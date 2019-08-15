@@ -47,7 +47,7 @@ module.exports = {
       //   })
 
       // }).then(() => {
-      this.$emit('handleDelete', id);
+      this.$emit('handleDelete', this.row);
       // })
       this.visible = false;
     }

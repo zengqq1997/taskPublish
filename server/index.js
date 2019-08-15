@@ -435,7 +435,7 @@ const fs = require('fs');
 var upload = multer({
   storage: multer.diskStorage({
     destination: function(req, file, cb) {
-      const url = __dirname + '\\uploads';
+      const url = __dirname + '/uploads';
       cb(null, url);
     },
     filename: function(req, file, cb) {
