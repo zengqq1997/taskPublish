@@ -189,11 +189,11 @@ export default {
   },
   methods: {
     fetchTask () {
+      // console.log(localStorage)
       this.$http.get('task').then(res => {
         for (let i = 0; i < res.data.length; i++) {
           if (res.data[i].publisher === localStorage.name) {
             this.taskData.push(res.data[i])
-            console.log(this.taskData[0].requirementFile.split('.')[0])
           }
         }
       }).then(() => {
@@ -213,8 +213,10 @@ export default {
       this.taskData2 = this.taskData
     },
 
-    handleDelete (id) {
-      this.$http.delete(`task/${id}`).then(res => {
+    handleDelete (row) {
+      this.$http.delete(`task/${row._id}`).then(res => {
+        this.$http.post(`delete/`, row)
+      }).then(res => {
         this.$message({
           message: '任务删除成功',
           type: 'success'

@@ -148,7 +148,7 @@ export default
         searchValue: '',
         taskData: [],
         searchData: [],
-        submitFile: '',
+        submitFile: null,
 
       };
     },
@@ -206,32 +206,39 @@ export default
         this.searchData = this.taskData;
       },
       submitTask (id, row) {
-        if (row.taskStatus === '已领取') {
-          row.taskStatus = '已完成';
-          row.getter = localStorage.name;
-          console.log(id);
-          console.log(row);
-          console.log(this.taskData);
-          row.submitFile = this.submitFile
-          this.$http.put(`/task/${id}`, row).then(res => { //res表示响应对象
-            this.$message({
-              message: '任务提交成功',
-              type: 'success'
+        if (this.submitFile === null) {
+          this.$message({
+            message: '请先上传文件',
+            type: 'warning'
+          })        }
+        else {
+          if (row.taskStatus === '已领取') {
+            row.taskStatus = '已完成';
+            row.getter = localStorage.name;
+            console.log(id);
+            console.log(row);
+            console.log(this.taskData);
+            row.submitFile = this.submitFile
+            this.$http.put(`/task/${id}`, row).then(res => { //res表示响应对象
+              this.$message({
+                message: '任务提交成功',
+                type: 'success'
+              });
+              this.fetch();
             });
-            this.fetch();
-          });
-        }
-        else if (row.taskStatus == '已完成') {
-          this.$message({
-            message: '该任务已提交，请勿重复提交',
-            type: 'warning'
-          })
-        }
-        else if (row.taskStatus == '已过期') {
-          this.$message({
-            message: '该任务已经超过截止日期',
-            type: 'warning'
-          })
+          }
+          else if (row.taskStatus == '已完成') {
+            this.$message({
+              message: '该任务已提交，请勿重复提交',
+              type: 'warning'
+            })
+          }
+          else if (row.taskStatus == '已过期') {
+            this.$message({
+              message: '该任务已经超过截止日期',
+              type: 'warning'
+            })
+          }
         }
       },
       handleEdit (index, row) { console.log(index, row); },

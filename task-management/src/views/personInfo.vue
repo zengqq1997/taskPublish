@@ -125,6 +125,7 @@ export default {
       }
     };
     return {
+      passwords: [],
       personData: [{
         name: '账号',
         value: '',
@@ -195,35 +196,28 @@ export default {
 
     },
     submitPass (formName) {
-      if (this.ruleForm.password === this.user.password) {
-        if (this.ruleForm.newPass === this.ruleForm.checkNewpass) {
-          if (this.ruleForm.newPass.length < 6 || this.rules.newPass > 30) {
-            this.$message({
-              message: '密码长度应为6-30个数字或字符',
-              type: 'error',
-            });
-          }
-          else {
-            this.user.password = this.ruleForm.newPass;
-            this.$http.put(`user/password/${this.user._id}`, this.user).then(res => {
-              this.$message({
-                message: '密码修改成功',
-                type: 'success',
-              });
-            });
-            this.modifyPassVisible = false;
-          }
-        }
-        else {
+      if (this.ruleForm.newPass === this.ruleForm.checkNewpass) {
+        if (this.ruleForm.newPass.length < 6 || this.rules.newPass > 30) {
           this.$message({
-            message: '两次密码不一致',
+            message: '密码长度应为6-30个数字或字符',
             type: 'error',
           });
+        }
+        else {
+          this.passwords[0] = this.ruleForm.password;
+          this.passwords[1] = this.ruleForm.newPass;
+          this.$http.put(`user/password/${this.user._id}`, this.passwords).then(res => {
+            this.$message({
+              message: '密码修改成功',
+              type: 'success',
+            });
+          });
+          this.modifyPassVisible = false;
         }
       }
       else {
         this.$message({
-          message: '密码错误',
+          message: '两次密码不一致',
           type: 'error',
         });
       }

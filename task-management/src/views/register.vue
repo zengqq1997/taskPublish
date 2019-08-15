@@ -135,41 +135,58 @@ export default {
   methods: {
     // 验证码发送
     getCode () {
-      this.$http.post("register", this.registerForm).then(res => {
-        console.log(res);
+      if (this.registerForm.email == " ") {
         this.$message({
-          message: "邮件已发送，请查看",
-          type: "success"
+          message: "请正确填写信息",
+          type: "error"
         });
-      });
-
-      let me = this;
-      me.isDisabled = true;
-      let interval = window.setInterval(function () {
-        me.btnMsg = "" + me.time + "秒后重新发送";
-        --me.time;
-        if (me.time < 0) {
-          me.btnMsg = "重新发送";
-          me.time = 10;
-          me.isDisabled = false;
-          window.clearInterval(interval);
-        }
-      }, 1000);
+      } else {
+        this.$http.post("register", this.registerForm).then(res => {
+          console.log(res);
+          this.$message({
+            message: "邮件已发送，请查看",
+            type: "success"
+          });
+        });
+        let me = this;
+        me.isDisabled = true;
+        let interval = window.setInterval(function () {
+          me.btnMsg = "" + me.time + "秒后重新发送";
+          --me.time;
+          if (me.time < 0) {
+            me.btnMsg = "重新发送";
+            me.time = 10;
+            me.isDisabled = false;
+            window.clearInterval(interval);
+          }
+        }, 1000);
+      }
     },
 
     //注册
     register () {
-      this.$http
-        .post(`register/${this.registerForm.email}`, this.registerForm)
-        .then(res => {
-          console.log(res);
-          this.$message({
-            message: "注册成功，请登录",
-            type: "success"
-          });
-          this.$router.push({ path: "/login" }); //post成功后跳到登录界面
-          //console.log(this.registerForm)
+
+      if (this.registerForm.email == " " || this.registerForm.vertifyCode == " " || this.registerForm.username.length < 2 || this.registerForm.username.length > 30 || this.registerForm.password.length < 6 || this.registerForm.password.length > 30) {
+        this.$message({
+          message: "请正确填写信息",
+          type: "error"
         });
+      } else {
+        this.$http
+          .post(`register/${this.registerForm.email}`, this.registerForm)
+          .then(res => {
+            console.log(111)
+            console.log(res);
+            this.$message({
+              message: "注册成功，请登录",
+              type: "success"
+            });
+            this.$router.push({ path: "/login" }); //post成功后跳到登录界面
+            //console.log(this.registerForm)
+          });
+      }
+
+
     },
 
     resetForm (formName) {

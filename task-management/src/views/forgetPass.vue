@@ -127,42 +127,56 @@ export default {
   methods: {
     // 验证码发送
     getCode () {
-      this.$http
-        .post(`login/${this.forgetPassForm.email}`, this.forgetPassForm)
-        .then(res => {
-          this.$message({
-            message: "邮件已发送，请查看",
-            type: "success"
-          });
-          console.log(res);
+      if (this.forgetPassForm.email == " ") {
+        this.$message({
+          message: "请正确填写信息",
+          type: "error"
         });
+      } else {
+        this.$http
+          .post(`login/${this.forgetPassForm.email}`, this.forgetPassForm)
+          .then(res => {
+            this.$message({
+              message: "邮件已发送，请查看",
+              type: "success"
+            });
+            console.log(res);
+          });
 
-      let me = this;
-      me.isDisabled = true;
-      let interval = window.setInterval(function () {
-        me.btnMsg = "" + me.time + "秒后重新发送";
-        --me.time;
-        if (me.time < 0) {
-          me.btnMsg = "重新发送";
-          me.time = 10;
-          me.isDisabled = false;
-          window.clearInterval(interval);
-        }
-      }, 1000);
+        let me = this;
+        me.isDisabled = true;
+        let interval = window.setInterval(function () {
+          me.btnMsg = "" + me.time + "秒后重新发送";
+          --me.time;
+          if (me.time < 0) {
+            me.btnMsg = "重新发送";
+            me.time = 10;
+            me.isDisabled = false;
+            window.clearInterval(interval);
+          }
+        }, 1000);
+      }
     },
 
     //修改密码
     forgetPass () {
-      this.$http
-        .put(`login/${this.forgetPassForm.email}`, this.forgetPassForm)
-        .then(res => {
-          this.$message({
-            message: "修改密码成功,请登录",
-            type: "success"
-          });
-          console.log(res);
-          setTimeout("location.reload()", 1000); 2
+      if (this.forgetPassForm.email == " " || this.forgetPassForm.vertifyCode == " " || this.forgetPassForm.password.length < 6 || this.forgetPassForm.password.length > 30) {
+        this.$message({
+          message: "请正确填写信息",
+          type: "error"
         });
+      } else {
+        this.$http
+          .put(`login/${this.forgetPassForm.email}`, this.forgetPassForm)
+          .then(res => {
+            this.$message({
+              message: "修改密码成功,请登录",
+              type: "success"
+            });
+            console.log(res);
+            setTimeout("location.reload()", 1000); 2
+          });
+      }
     },
 
     resetForm (formName) {

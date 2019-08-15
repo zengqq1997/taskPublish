@@ -86,12 +86,10 @@ app.post('/api/register', async (req, res) => {
 
   transporter.sendMail(mail, function(err, info) {
     if (err) {
-      console.log(err);
       return res.status(404).send({
         message: '错误'
       });
     }
-    console.log('mail sent:', info.response);
     return res.status(200).send({
       message: '邮件已发送，请查看'
     });
@@ -140,13 +138,12 @@ app.post('/api/register/:email', async (req, res) => {
         },
         { new: true }
       );
-      console.log(user);
+
       return res.status(200).send({
         message: '注册成功，请登录'
       });
     } else {
       await user.remove(); //如果不成功需移除数据库数据
-      console.log(user);
       return res.status(422).send({
         message: '验证码错误或已过期'
       });
@@ -156,7 +153,7 @@ app.post('/api/register/:email', async (req, res) => {
 
 //登录
 app.post('/api/login', async (req, res) => {
-  const email = req.body.email;
+  const email = req.body.email.replace(/(^\s*)|(\s*$)/g, ''); //去掉开头和结尾空格;
   var flag = 0;
   //先找邮箱
   let user = await User.findOne({
@@ -176,7 +173,6 @@ app.post('/api/login', async (req, res) => {
       flag = 1;
     }
   }
-  console.log(flag);
   assert(flag, 422, '用户不存在');
   assert(user.isLive, 422, '用户不存在');
 
@@ -238,19 +234,17 @@ app.post('/api/login/:email', async function(req, res) {
   };
   transporter.sendMail(mail, function(err, info) {
     if (err) {
-      console.log(err);
       return res.status(404).send({
         message: '错误'
       });
     }
-    console.log('mail sent:', info.response);
     return res.status(200).send({
       message: '邮件已发送，请查看'
     });
   });
 });
 
-//忘记密码的修改密码
+//修改密码
 app.put('/api/login/:email', async (req, res) => {
   const email = req.body.email;
   const vertifyCode = req.body.vertifyCode;
@@ -268,7 +262,6 @@ app.put('/api/login/:email', async (req, res) => {
   });
   //如果找到那条记录
   if (user) {
-    //console.log(1111);
     var nowDate = String(new Date().getTime()); //获取当前时间
     //判断验证码是否正确，时间是否超过10分钟
     if (user.vertifyCode === vertifyCode && nowDate - user.date < 600000) {
@@ -281,12 +274,11 @@ app.put('/api/login/:email', async (req, res) => {
         },
         { new: true }
       );
-      console.log(user);
+
       return res.status(200).send({
         message: '修改密码成功,请登录'
       });
     } else {
-      console.log(user);
       return res.status(422).send({
         message: '验证码错误或已过期'
       });
@@ -338,11 +330,23 @@ app.put('/api/user/:id', async (req, res) => {
 
 //修改密码
 app.put('/api/user/password/:id', async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, {
-    password: req.body.password
-  });
-  res.send(user);
+  const user = await User.findById(req.params.id);
+  const isPasswordValid = require('bcrypt').compareSync(
+    req.body[0],
+    user.password
+  );
+  if (isPasswordValid) {
+    const user1 = await User.findByIdAndUpdate(req.params.id, {
+      password: req.body[1]
+    });
+    res.send(user1);
+  } else {
+    return res.status(422).send({
+      message: '密码错误'
+    });
+  }
 });
+
 //新增任务
 app.post('/api/task', async (req, res) => {
   const task = await Task.create(req.body);
@@ -371,7 +375,6 @@ app.get(
     await next(); //调用下一个
   },
   async (req, res) => {
-    console.log(req.user);
     const tasks = await Task.find();
     res.send(tasks);
   }
@@ -427,7 +430,7 @@ app.get(
 
 //上传文件
 const multer = require('multer');
-const iconv = require('iconv-lite');
+const fs = require('fs');
 // const upload = multer({ dest: __dirname + '/uploads' });
 var upload = multer({
   storage: multer.diskStorage({
@@ -456,6 +459,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 });
 //删除文件
 app.post('/api/delete/', async (req, res) => {
+  // console.log(req);
   fs.unlinkSync(`./uploads/${req.body.requirementFile.split('/')[4]}`);
   await Task.findByIdAndUpdate(
     req.body._id,
@@ -464,11 +468,13 @@ app.post('/api/delete/', async (req, res) => {
     },
     { new: true }
   );
+  res.send({
+    status: true
+  });
 });
 
 // 错误处理函数
 app.use(async (err, req, res, next) => {
-  // console.log(err)
   res.status(err.statusCode || 500).send({
     message: err.message
   });

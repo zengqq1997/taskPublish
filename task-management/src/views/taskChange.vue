@@ -156,7 +156,6 @@ export default {
 
     },
     handleRemove () {
-      console.log(this.form);
       this.$http.post(`delete/`, this.form)
     },
     beforeRemove (file, fileList) {
