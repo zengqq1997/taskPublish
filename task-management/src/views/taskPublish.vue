@@ -43,11 +43,13 @@
             </el-form-item>
             <el-form-item label="需求文件:">
               <span><a :href="props.row.requirementFile"
-                   download="">下载</a></span>
+                   download=""
+                   target="_blank">下载</a></span>
             </el-form-item>
             <el-form-item label="提交文件">
               <span><a :href="props.row.submitFile"
-                   download="">下载</a></span>
+                   download=""
+                   target="_blank">下载</a></span>
             </el-form-item>
           </el-form>
         </template>
